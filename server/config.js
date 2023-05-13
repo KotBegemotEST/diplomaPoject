@@ -1,7 +1,17 @@
+// var databaseOptions = {
+//     host: 'wasat.elkdata.ee',
+//     user: "vhost85181s2",
+//     password: "JDXHUs5SW6nK8nReVhmaCAHG3TZdQPu9",
+//     database: "vhost85181s2",
+// }
+// module.exports = {databaseOptions: databaseOptions} ;
+
+
+
 var databaseOptions = {
-    host: 'wasat.elkdata.ee',
-    user: "vhost85181s2",
-    password: "JDXHUs5SW6nK8nReVhmaCAHG3TZdQPu9",
-    database: "vhost85181s2",
-}
-module.exports = {databaseOptions: databaseOptions} ;
+        host: 'localhost',
+        user: "root",
+        password: "",
+        database: "vhost85181s2",
+    }
+    module.exports = {databaseOptions: databaseOptions} ;

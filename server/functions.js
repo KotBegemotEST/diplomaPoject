@@ -52,7 +52,7 @@ function isDate(input) {
 
 function getMonthNumber(dateString) {
   const date = new Date(dateString);
-  const monthIndex = date.getUTCMonth() + 1;
+  const monthIndex = date.getMonth() + 1;
   const monthNumber = monthIndex < 10 ? `0${monthIndex}` : monthIndex;
   return monthNumber;
 }

@@ -25,7 +25,7 @@ app.get("/getMentor", (req, res) => {
     connection.connect();
     connection.query("SELECT DISTINCT username, firstname, lastname, email, city FROM mdl_user JOIN mdl_role JOIN mdl_role_assignments on mdl_role_assignments.userid=mdl_user.id where roleid=3", (error, results) => {
         if (error) throw error;
-        res.json(results);
+        res.send(results);
     });
 })
 
@@ -52,14 +52,14 @@ app.post("/getAllMentors", (req, res) => {
     GROUP BY mdl_user.firstname, mdl_user.lastname, mdl_user.city, mdl_user.email;"
     connection.query(sqlQuery,[dateEnd, dateStart], (error, data) => {
         if (error) {
-            return res.status(500).json({error });
+            return res.send({error });
           }
           const formattedData = data.map((mentor) => ({
             ...mentor,
             dateStart: functions.formatDate(dateStart),
             dateEnd: functions.formatDate(dateEnd),
           }));
-          return res.status(200).json({data:formattedData});
+          return res.send({data:formattedData});
     });
 })
 
@@ -72,27 +72,34 @@ app.post('/saveMentor', (req, res) => {
 
     let dateStart = functions.getCurrentMonthRange().startOfMonth
     let dateEnd = functions.getCurrentMonthRange().endOfMonth
+    
     const { mentorEmail: email } = req.body;
+    if(email == null){
+      return res.send({error: "Account wasn`t found"})
+    }
     const sqlQuery =
-    "SELECT DISTINCT mdl_user.firstname, mdl_user.lastname, mdl_user.city, COUNT(*) * 2.5 AS lesson_number \
-  FROM mdl_attendance_log \
-  INNER JOIN mdl_attendance_statuses ON mdl_attendance_statuses.id = mdl_attendance_log.statusid \
-  INNER JOIN mdl_user ON mdl_user.id = mdl_attendance_log.studentid \
-  INNER JOIN mdl_attendance_sessions ON mdl_attendance_sessions.id = mdl_attendance_log.sessionid \
-  WHERE mdl_user.email = ? AND mdl_attendance_statuses.acronym = 'P'\
-  AND mdl_attendance_sessions.sessdate < ? \
-  AND mdl_attendance_sessions.sessdate > ? ";
+    "SELECT mdl_user.firstname, mdl_user.lastname, mdl_user.city, COUNT(*) * 2.5 AS lesson_number\
+    FROM mdl_attendance_log\
+    INNER JOIN mdl_attendance_statuses ON mdl_attendance_statuses.id = mdl_attendance_log.statusid\
+    INNER JOIN mdl_user ON mdl_user.id = mdl_attendance_log.studentid\
+    INNER JOIN mdl_attendance_sessions ON mdl_attendance_sessions.id = mdl_attendance_log.sessionid\
+    WHERE mdl_user.email = ? AND mdl_attendance_statuses.acronym = 'P'\
+    AND mdl_attendance_sessions.sessdate < ?\
+    AND mdl_attendance_sessions.sessdate > ?\
+    GROUP BY mdl_user.firstname, mdl_user.lastname, mdl_user.city, mdl_user.email";
 
   connection.query(sqlQuery, [email, dateEnd, dateStart], (err, data) => {
         if (err) {
-          return res.status(500).json({err });
+          return res.send({err });
 
         }
         data[0]["dateStart"] = functions.formatDate(dateStart)
         data[0]["dateEnd"] = functions.formatDate(dateEnd)
-        return res.status(200).json({data});
+        return res.send({data});
       });
 });
+
+
 
 app.post('/saveMentorWithout', (req, res) => {
     const connection = mysql.createConnection(config.databaseOptions);
@@ -104,11 +111,21 @@ app.post('/saveMentorWithout', (req, res) => {
 
   connection.query(sqlQuery, [email], (err, data) => {
         if (err) {
-          return res.status(500).json({err });
+          return res.send({err });
         }
-        return res.status(200).json({data});
+        return res.send({data});
       });
 });
+
+app.post("/getMonthInfo",(req,res)=>{
+    const query = "SELECT DISTINCT endDate FROM workers";
+db.query(query,(err,data)=>{
+    if (err) {
+        return res.send({ error: err });
+        }
+        return res.send( data);
+    })
+})
 
 
 app.post("/encryptPass",(req,res)=>{
@@ -154,9 +171,9 @@ app.post("/hourlyRates/filterByCity",(req,res)=>{
     "SELECT DISTINCT username, firstname, lastname, email, city FROM mdl_user JOIN mdl_role JOIN mdl_role_assignments on mdl_role_assignments.userid=mdl_user.id where roleid=3 and mdl_user.city=?";
   connection.query(sqlQuery, [city], (err, data) => {
         if (err) {
-          return res.status(500).json({err });
+          return res.send({err });
         }
-        return res.status(200).json(data);
+        return res.send(data);
       });
 })
 
@@ -165,19 +182,19 @@ app.post('/saveMentorPMS', (req, res) => {
     const checkQuery = "SELECT COUNT(*) as count FROM workers WHERE workerEmail = ? AND (startDate >= ? AND endDate >= ?)";
     db.query(checkQuery, [email, dateStart, dateEnd ], (err, result) => {
       if (err) {
-        return res.status(500).json({ error: err });
+        return res.send({ error: err });
       }
   
       const count = result[0].count;
       if (count > 0) {
-        return res.status(200).json({ exists: true });
+        return res.send({ exists: true });
       } else {
         const insertQuery = "INSERT INTO workers (firstName, lastName, workerEmail, city, teachingHours,fixedFee,hourlyRates,startDate,endDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         db.query(insertQuery, [firstname, lastname, email, city, lesson_number, "0", "6", dateStart, dateEnd], (err, data) => {
           if (err) {
-            return res.status(500).json({ error: err });
+            return res.send({ error: err });
           }
-          return res.status(200).json({ data });
+          return res.send({ data });
         });
       }
     });
@@ -189,9 +206,9 @@ app.post('/saveMentorPMS', (req, res) => {
     console.log(functions.formatDateYYMMDD(date))
     db.query(query, [firstName, lastName,  date], (err, data) => {
       if (err) {
-        return res.json(err);
+        return res.send(err);
       }
-      return res.status(200).json({ data });
+      return res.send({ data });
     });
   });
 
@@ -199,7 +216,6 @@ app.post("/getSheets", (req, res) => {
     let querySelect = "SELECT COUNT(*) AS count FROM workersextraactions WHERE firstname = ? AND lastname = ? AND MONTH(date) = MONTH(?)";
     let query = "INSERT INTO workersextraactions (idextraActions, date, extrahours, firstname, lastname) VALUES (?, ?, ?, ?, ?)";
     sheets.mentorsData.forEach(({ categoryID, name, date, hours }) => {
-        console.log(date)
         date = functions.formatDateYYMMDD(date)
         if(typeof categoryID === 'string') {
             db.query(querySelect, [name[0], name[1], date], (err, results) => {
@@ -267,22 +283,70 @@ app.post("/hourlyRates/mentorFilter",(req,res)=>{
     }
 
     db.query(query, queryParams, (err, data) => {
-        if (err) return res.json(err);
-        return res.status(200).json({ data });
+        if (err) return res.send(err);
+        return res.send({ data });
     });
 })
 
 app.get("", (req, res) => {
-    res.json("helo this is the db")
+    res.send("helo this is the db")
 })
 
 app.get("/users", (req, res) => {
     const q = "SELECT * from accounts"
     db.query(q, (err, data) => {
-        if (err) return res.json(err)
-        return res.json(data)
+        if (err) return res.send(err)
+        return res.send(data)
     })
 })
+
+app.post("/getInfoFor", async (req, res) => {
+    const monthNum = req.body.month
+    const readyQuery = "SELECT * FROM workers w WHERE MONTH(w.startDate) = ?";
+    const readyQuery2 = "SELECT SUM(workersextraactions.extrahours * extraactions.extraRate) AS totalCost FROM workersextraactions JOIN extraactions ON workersextraactions.idextraActions = extraactions.idextraActions WHERE MONTH(date) = ?";
+ 
+    console.log("monthNum "+monthNum)
+    let extraSalary = 0;
+    let usualSalary = 0;
+    let salaryes = {};
+  
+    const [data, data2] = await Promise.all([
+      new Promise((resolve, reject) => {
+        db.query(readyQuery,[monthNum], (err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            console.logdata
+            resolve(data);
+          }
+        });
+      }),
+      new Promise((resolve, reject) => {
+        db.query(readyQuery2,[monthNum] ,(err, data) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(data);
+          }
+        });
+      })
+    ]);
+  
+    for (let i = 0; i < data.length; i++) {
+      let hourlyRate = parseFloat(data[i].hourlyRates);
+      let teachingHours = parseFloat(data[i].teachingHours);
+      let cost = hourlyRate * teachingHours;
+      usualSalary += cost;
+    }
+  
+    extraSalary = data2[0].totalCost;
+  
+    salaryes.usualSalary = usualSalary;
+    salaryes.extraSalary = extraSalary;
+  
+    console.log(salaryes);
+    res.send({ message: salaryes });
+  });
 
 app.post("/usersCreate", (req, res) => {
     const readyQuery = "INSERT INTO Accounts (`accountID`,`lastName`,`firstName`,`email`,`login`,`password`) VALUES (?)";
@@ -297,45 +361,37 @@ app.post("/usersCreate", (req, res) => {
 
 
     db.query(readyQuery, [values], (err, data) => {
-        if (err) return res.json(err)
-        return res.json("account was added succesfuly")
+        if (err) return res.send(err)
+        return res.send("account was added succesfuly")
     })
 })
 
 
 app.post("/deleteWorker", (req, res) => {
-    const workerid = req.body.workerid
-    db.query("DELETE FROM workers WHERE workers.workerid = ?", [workerid], (err, data) => {
-        if (err) return res.json(err)
-        res.send("Account was deleted succesfuly")
-            if (data.length > 0) {
-                res.send(data)
-            } else {
-                res.send({ message: "Wrong email" })
-            }
-
-    })
-})
+  const workerid = req.body.workerid;
+  db.query("DELETE workers, workersextraactions FROM workers LEFT JOIN workersextraactions ON workers.firstName = workersextraactions.firstName AND workers.lastName = workersextraactions.lastName WHERE workers.workerid = ?", [workerid], (err, data) => {
+      if (err) return res.send(err);
+      res.send("Account was deleted successfully");
+  });
+});
 
 app.post("/saveWorkerInfo", (req, res) => {
     const { workerid, firstName, lastName,city,hours,job_name,hourly_rates,fixed_fee } = req.body;
-
     db.query("UPDATE workers SET firstName = ?, lastName = ?, city = ?, teachingHours = ?, hourlyRates = ?, fixedFee = ? WHERE workerid = ?", [firstName,lastName,city,hours,hourly_rates,fixed_fee,workerid], (err, data) => {
-        if (err) return res.json(err)
+        if (err) return res.send(err)
                 res.send("Saved succesfuly")
-                // return res.json("account was deleted succesfuly" + workerid)
-            if (data.length > 0) {
-                res.send(data)
-            } else {
-                res.send({ message: "Wrong email" })
-            }
-
+            //     // return res.json("account was deleted succesfuly" + workerid)
+            // if (data.length > 0) {
+            //     res.send(data)
+            // } else {
+            //     res.send( "Something Wrong" )
+            // }
     })
 })
 
 app.post("/extraRates",(req,res)=>{
     db.query("SELECT * FROM extraactions", (err, data) => {
-        if (err) return res.json(err)
+        if (err) return res.send(err)
         if (data.length > 0) {
             res.send(data)
         } else {
@@ -344,10 +400,11 @@ app.post("/extraRates",(req,res)=>{
     })
 })
 
-app.delete("/deleteaction",(req,res)=>{
+app.post("/deleteaction",(req,res)=>{
     const idextraActions = req.body.idextraActions
+    console.log(idextraActions)
     db.query("DELETE FROM extraactions WHERE extraactions.idextraActions = ?",[idextraActions], (err, data) => {
-        if (err) return res.json(err)
+        if (err) return res.send(err)
         if (data.length > 0) {
             res.send(data)
         } else {
@@ -359,7 +416,7 @@ app.delete("/deleteaction",(req,res)=>{
 app.post("/updateaction",(req,res)=>{
     const { id, name, rate } = req.body;
     db.query("UPDATE extraactions SET extraName = ?, extraRate = ? WHERE idextraActions = ?", [name, rate, id], (err, data) => {
-        if (err) return res.json(err)
+        if (err) return res.send(err)
         if (data.length > 0) {  
             res.send(data)
         } else {
@@ -378,7 +435,7 @@ app.post("/getInfo", (req, res) => {
       "SELECT * FROM edufinance.workers WHERE startDate >= ? AND endDate <= ?;",
       [startDate, endDate],
       (err, data) => {
-        if (err) return res.json(err);
+        if (err) return res.send(err);
         if (data.length > 0) {
           res.send(data);
         } else {
@@ -440,26 +497,28 @@ app.post("/login", (req, res) => {
 app.post("/sendSalary", (req, res) => {
     const mentor = req.body.mentor;
     const { firstName, lastName, startDate} = mentor;
-    const monthNumber = functions.getMonthNumber(functions.formatDateYYMMDD(startDate))
+    const monthNumber = parseInt(functions.getMonthNumber(functions.formatDateYYMMDD(startDate)))+1
+    console.log("firstName, lastName, startDate,monthNumber ---- " + firstName, lastName, startDate,monthNumber)
     db.query(
       "SELECT w.*, e.extraName, e.extraRate \
       FROM workersextraactions w \
       INNER JOIN extraactions e ON w.idextraActions = e.idextraActions WHERE w.firstname = ? AND w.lastname = ? AND MONTH(w.date) = ?",
       [firstName, lastName, monthNumber],
       (err, extraData) => {
+        console.error("extraData: " + JSON.stringify(extraData));
         if (err) {
           console.error(err);
-          return res.status(500).send("Error retrieving extra data");
+          return res.send("Error retrieving extra data");
         }
         mentor.extraActions = extraData.map(({extraName, extraRate, extrahours}) => ({extraName, extraRate, extrahours}));
         excelGenerator.generateExcel(mentor)
           .then(() => {
             console.log("Excel file created successfully");
-            res.status(200).send("Salary file generated successfully");
+            res.send("Salary file generated successfully");
           })
           .catch((error) => {
             console.error(error);
-            res.status(500).send("Error generating salary");
+            res.send("Error generating salary");
           });
       }
     )
@@ -469,27 +528,3 @@ app.post("/sendSalary", (req, res) => {
 app.listen(8080, () => {
     console.log("was connected")
 })
-
-
-// const spawn = require('child_process').spawn;
-
-// function startApp() {
-//   const app = spawn('node', ['index.js']);
-//   app.stdout.on('data', (data) => {
-//     console.log(`stdout: ${data}`);
-//   });
-
-//   app.stderr.on('data', (data) => {
-//     console.error(`stderr: ${data}`);
-//   });
-
-//   app.on('close', (code) => {
-//     console.log(`child process exited with code ${code}`);
-//     if (code !== 0) {
-//       console.log('Restarting application...');
-//       startApp();
-//     }
-//   });
-// }
-
-// startApp();

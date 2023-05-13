@@ -158,7 +158,7 @@ function listMajors(auth) {
           });
           _context4.next = 3;
           return regeneratorRuntime.awrap(sheets.spreadsheets.values.get({
-            spreadsheetId: '1M4Mfkwg9fxwR-iaXtGjmwbLd3hDzxs_fWLhsqcg5tEs',
+            spreadsheetId: '1NfXkiIO2G7M5drpHU-OQVMJY3AVUXsJ_2opfalFdvZo',
             range: 'A1:X'
           }));
 
@@ -185,8 +185,8 @@ function listMajors(auth) {
   });
 }
 
-cities = ["Tartu", "Narva", "Kohtla-Järve", "Tallinn"];
-jobsType = ["Automatisation", "Bookkeeping", "Communication", "Community", "Curriculum", "Design", "Engineering", "Events", "Homework sending", "Individual Lesson", "Individual lesson with special needs", "Invoices", "Onboarding", "Schedule", "Social media", "Trial Lesson", "General"];
+var cities = ["Tartu", "Narva", "Kohtla-Järve", "Tallinn"];
+var jobsType = ["Automatisation", "Bookkeeping", "Communication", "Community", "Curriculum", "Design", "Engineering", "Events", "Homework sending", "Individual Lesson", "Individual lesson with special needs", "Invoices", "Onboarding", "Schedule", "Social media", "Trial Lesson", "General"];
 var mentorsData = [];
 authorize().then(function _callee(auth) {
   var data;
@@ -326,10 +326,11 @@ authorize().then(function _callee(auth) {
 
             mentorsData.push(mentorData);
           });
+          console.log("mentorsData");
           console.log(mentorsData);
           return _context5.abrupt("return", mentorsData);
 
-        case 7:
+        case 8:
         case "end":
           return _context5.stop();
       }

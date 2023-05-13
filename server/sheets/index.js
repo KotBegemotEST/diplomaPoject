@@ -71,7 +71,7 @@ async function authorize() {
 async function listMajors(auth) {
   const sheets = google.sheets({version: 'v4', auth});
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: '1M4Mfkwg9fxwR-iaXtGjmwbLd3hDzxs_fWLhsqcg5tEs',
+    spreadsheetId: '1NfXkiIO2G7M5drpHU-OQVMJY3AVUXsJ_2opfalFdvZo',
     range: 'A1:X',
   });
   const rows = res.data.values;
@@ -83,8 +83,8 @@ async function listMajors(auth) {
   return rows
 }
 
-cities = ["Tartu","Narva","Kohtla-Järve","Tallinn"]
-jobsType = ["Automatisation",  "Bookkeeping",  "Communication",  "Community",  "Curriculum",  "Design",  "Engineering",  "Events",  "Homework sending",  "Individual Lesson",  "Individual lesson with special needs",  "Invoices",  "Onboarding",  "Schedule",  "Social media",  "Trial Lesson",  "General"]
+let cities = ["Tartu","Narva","Kohtla-Järve","Tallinn"]
+let jobsType = ["Automatisation",  "Bookkeeping",  "Communication",  "Community",  "Curriculum",  "Design",  "Engineering",  "Events",  "Homework sending",  "Individual Lesson",  "Individual lesson with special needs",  "Invoices",  "Onboarding",  "Schedule",  "Social media",  "Trial Lesson",  "General"]
 const mentorsData = []
 authorize().then(async (auth) => {
   const data = await listMajors(auth);
@@ -210,6 +210,7 @@ authorize().then(async (auth) => {
     mentorsData.push(mentorData)
 
   });
+  console.log("mentorsData")
   console.log(mentorsData)
   return mentorsData
 
