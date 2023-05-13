@@ -61,6 +61,8 @@ body{
     justify-content: space-between;
     height: 100vh;
 }
+
+
 /* ----------- logined header ------------------------------------ */
 .loginedHeader{
     background: linear-gradient( #1845ad, #23a2f6 );
@@ -411,6 +413,7 @@ tbody .workerInput:after{
     border: none;
     outline: none;
     margin-right: 15px;
+    margin-left: 0px;
 }
 
 
@@ -501,6 +504,10 @@ tbody .workerInput:after{
   border: 2px solid #06f;
 }
 
+.edit:hover{
+    background-color: #0066ff89;
+}
+
 .edit:focus {
   color: #171e29;
 }
@@ -521,7 +528,8 @@ tbody .workerInput:after{
     background-color: rgb(255, 55, 0);
     border: 2px solid rgb(255, 55, 0);
   }
-  
+
+
 .delete:focus {
     color: #171e29;
 }
@@ -592,6 +600,68 @@ tbody .workerInput:after{
 }
 
 
+/* ----------- Total ------------------------------------ */
+.totalDiv *{
+    font-family: 'Poppins',sans-serif;
+}
+
+
+#monthSelect{
+    background: url("../imgs/arrow.png");
+    padding: 10px;
+    padding-left: 15px;
+    color: rgb(0 0 0);
+    background-color: #ffffff;
+    width: 125px;
+    height: 40px;
+    margin-bottom: 15px;
+    appearance: none;
+    background-repeat: no-repeat;
+    background-size: 11px;
+    background-position: 90px 11px;
+    border: 1px solid #0066ff;
+    background-color: #0066ff14;
+
+
+    
+}
+
+
+.totalText{
+    font-weight: bold;
+    line-height: 24px;
+}
+
+.redBold{
+    color: red;
+}
+
+.totalDiv{
+    margin-left: 25px;
+    margin-right: 25px;
+}
+
+.total:before{
+    content: "";
+    display: block;
+    position: absolute;
+    top: 15px;
+    width: 100%;
+    height: 1px;
+    background-color: #0066ff;
+}
+
+.total{
+    padding-top: 25px;
+    font-size: 24px;
+    font-weight: bold;
+    position: relative;
+}
+
+.salary{
+    margin-left: 25px;
+}
+
 /* ----------- FOOTER ------------------------------------ */
 
 
@@ -635,7 +705,11 @@ tbody .workerInput:after{
     height: 40vmin;
     pointer-events: none;
   }
-  
+  .pageContent{
+    height: 100vh;
+  }
+
+
   @media (prefers-reduced-motion: no-preference) {
     .App-logo {
       animation: App-logo-spin infinite 20s linear;

@@ -1,6 +1,5 @@
-import React from 'react'
 import Footer from '../components/Footer'
-import { useState, useEffect } from 'react'
+import {React, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import LoginedHeader from '../components/LoginedHeader'
 import Modal from '../modal/Modal'
@@ -33,6 +32,10 @@ const HourlyRates = () => {
     return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    getData();
+  }, [modalActive, filterParams, showPopup]);
+
 
   async function getData() {
     try {
@@ -58,9 +61,7 @@ const HourlyRates = () => {
     }
   }
 
-  useEffect(() => {
-    getData();
-  }, [modalActive, filterParams, showPopup]);
+
 
 
   const saveMentor = async () => {
@@ -68,21 +69,28 @@ const HourlyRates = () => {
       const res = await axios.post("http://localhost:8080/saveMentor", {
         mentorEmail: selectedMentor,
       });
-
-      const savedMentor = res.data.data[0];
-      if (savedMentor.firstname === null && savedMentor.lastname === null) {
-        const newRes = await axios.post("http://localhost:8080/saveMentorWithout", {
-          mentorEmail: selectedMentor,
-        });
-        const newSavedMentor = newRes.data.data[0];
-        newSavedMentor.email = selectedMentor;
-        setSavedMentor(newSavedMentor);
-        saveMentorToPMS(newSavedMentor);
-      } else {
-        savedMentor.email = selectedMentor;
-        setSavedMentor(savedMentor);
-        saveMentorToPMS(savedMentor);
+      if (res.data.error){
+        setShowPopup({ nameclass: "error", active: true, text: res.data.error });
+      }else{
+        const savedMentor = res.data.data[0];
+        if (savedMentor.firstname === null && savedMentor.lastname === null) {
+          const newRes = await axios.post("http://localhost:8080/saveMentorWithout", {
+            mentorEmail: selectedMentor,
+          });
+          const newSavedMentor = newRes.data.data[0];
+          newSavedMentor.email = selectedMentor;
+          setSavedMentor(newSavedMentor);
+          saveMentorToPMS(newSavedMentor);
+          insertExtra();
+        } else {
+          savedMentor.email = selectedMentor;
+          setSavedMentor(savedMentor);
+          saveMentorToPMS(savedMentor);
+          insertExtra();
+        }
       }
+
+
     } catch (error) {
       setShowPopup({ nameclass: "error", active: true, text: error });
     }
@@ -164,6 +172,7 @@ const HourlyRates = () => {
       } else {
         setShowPopup({ nameclass: "success", active: true, text: "Mentor was added" });
       }
+      insertExtra()
     } catch (error) {
       console.log(error);
     }
@@ -252,6 +261,8 @@ const HourlyRates = () => {
                 key={index}
                 index={index}
                 item={item}
+                setShowPopup={setShowPopup}
+
                
               />
             ))

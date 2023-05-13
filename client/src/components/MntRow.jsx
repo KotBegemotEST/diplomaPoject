@@ -1,6 +1,4 @@
-import React from 'react'
-import Modal from '../modal/Modal';
-import { useState,useEffect} from 'react'
+import {React, useState} from 'react'
 import axios from "axios";
 
 const MntRow = (props) => {

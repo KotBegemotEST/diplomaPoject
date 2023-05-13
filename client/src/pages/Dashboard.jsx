@@ -1,6 +1,5 @@
 import { React,useEffect,useState } from 'react';
 import Footer from '../components/Footer'
-import Header from '../components/Header'
 import { Navigate } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 import LoginedHeader from '../components/LoginedHeader';

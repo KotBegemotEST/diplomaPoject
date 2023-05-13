@@ -22,11 +22,7 @@ const Salary = () => {
       try {
         const res = await axios.post("http://localhost:8080/getInfo")
         if (res.data) {
-          console.log(res.data)
-          console.log("Инфо получено: ")
           setInfo(res.data)
-        } else {
-          console.log("что-то не то")
         }
       } catch (error) {
         console.error(error)

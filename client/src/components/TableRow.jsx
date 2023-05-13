@@ -1,8 +1,6 @@
-import React from 'react'
-import { useState, useEffect } from 'react'
+import {React, useState, useEffect } from 'react'
 import axios from "axios";
 import Modal from '../modal/Modal'
-import Popupinfo from '../modal/Popupinfo';
 const TableRow = (props) => {
   const [editable, setEditable] = useState("");
   const [workerid, setWorkerId] = useState(props.item.workerid);
@@ -67,7 +65,6 @@ const TableRow = (props) => {
 
 
   const editInfo = () => {
-    console.log("I am editing row with id: " + workerid)
     setEditable(true)
     const workerString = document.querySelectorAll(".id-" + workerid.toString() + " input")
     workerString.forEach(input => {
@@ -176,8 +173,6 @@ const TableRow = (props) => {
           ))}
         </div>
       </Modal>
-      <Popupinfo nameclass={showPopup.nameclass} text={showPopup.text} active={showPopup.active} setShowPopup={setShowPopup} />
-
     </>
   )
 }

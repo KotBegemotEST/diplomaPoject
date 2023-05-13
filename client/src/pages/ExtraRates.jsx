@@ -14,9 +14,24 @@ const ExtraRates = () => {
     if (!loggedInUser) {
       navigate('/login');
     }
+  
+    const fetchData = async () => {
+      try {
+        const res = await axios.post("http://localhost:8080/extraRates",{})
+        if(res.data){
+          setExtraActions(res.data)
+        }
+      } catch (error) {
+        console.log(error)
+      }
+    }
+    fetchData()
   }, []);
 
 
+  const handleDelete = (id) => {
+    setExtraActions(extraActions.filter((item) => item.idextraActions !== id));
+  };
 
   const handleSave = (rowData) => {
     axios.post("http://localhost:8080/updateaction", rowData)
@@ -28,20 +43,7 @@ const ExtraRates = () => {
   }
 
   
-  useEffect(()=>{
-    const fetchData = async () => {
-      try {
-        const res = await axios.post("http://localhost:8080/extraRates",{})
-        if(res.data){
-          setExtraActions(res.data)  
 
-        }
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    fetchData()
-  },[])
 
   return (
     <>
@@ -63,6 +65,7 @@ const ExtraRates = () => {
                 extraName= {item.extraName}
                 extraRate = {item.extraRate}
                 onSave={handleSave}
+                onDelete={handleDelete}
               />
             )
           })}

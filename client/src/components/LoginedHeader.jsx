@@ -34,18 +34,15 @@ export default function LoginedHeader() {
             <span className='logo'>EduFinance</span>
           </div>
           <div className='loginedMenu'>
-            {/* <a href='/profile' className='menu-item'>
-              profile
-            </a> */}
             <a href='/HourlyRates' className='menu-item'>
               hourly rates
             </a>
             <a href='/extraRates' className='menu-item'>
               Extra hours
             </a>
-            {/* <a href='/HourlyRates' className='menu-item'>
+            <a href='/total' className='menu-item'>
               Total
-            </a> */}
+            </a>
             <a href="/salarySend" className='menu-item'>
               Generate salary blank
             </a>
