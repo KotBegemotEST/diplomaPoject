@@ -191,6 +191,7 @@ const HourlyRates = () => {
     }
   }
 
+
   return (
     <>
       <LoginedHeader />
@@ -205,6 +206,7 @@ const HourlyRates = () => {
         </div>
         <div className='city-filter'>
           <select id="city" className='city' name="city" value={filterParams.city} onChange={handleCityChange} >
+            <option value="">Kõik</option>
             <option value="Tallinn">Tallinn</option>
             <option value="Narva">Narva</option>
             <option value="Kohtla-Jarve">Kohtla-Jarve</option>
