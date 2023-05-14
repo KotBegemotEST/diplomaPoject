@@ -261,13 +261,13 @@ app.post("/hourlyRates/mentorFilter",(req,res)=>{
     }
 
     if (req.body.params['startDate'] && req.body.params['endDate']) {
-        query += " AND startDate >= ? AND endDate <= ?";
+        query += " AND startDate >= ? AND endDate >= ?";
         queryParams.push(req.body.params['startDate'],req.body.params['endDate']);
     }else if(req.body.params['startDate'] && !req.body.params['endDate']){
-        query += " AND startDate <= ?";
+        query += " AND startDate >= ?";
         queryParams.push(req.body.params['startDate'])
     }else if(!req.body.params['startDate'] && req.body.params['endDate']){
-        query += " AND endDate >= ?";
+        query += " AND endDate <= ?";
         queryParams.push(req.body.params['endDate']);
     }
     
@@ -301,52 +301,59 @@ app.get("/users", (req, res) => {
 })
 
 app.post("/getInfoFor", async (req, res) => {
-    const monthNum = req.body.month
-    const readyQuery = "SELECT * FROM workers w WHERE MONTH(w.startDate) = ?";
-    const readyQuery2 = "SELECT SUM(workersextraactions.extrahours * extraactions.extraRate) AS totalCost FROM workersextraactions JOIN extraactions ON workersextraactions.idextraActions = extraactions.idextraActions WHERE MONTH(date) = ?";
- 
-    console.log("monthNum "+monthNum)
-    let extraSalary = 0;
-    let usualSalary = 0;
-    let salaryes = {};
-  
-    const [data, data2] = await Promise.all([
-      new Promise((resolve, reject) => {
-        db.query(readyQuery,[monthNum], (err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            console.logdata
-            resolve(data);
-          }
-        });
-      }),
-      new Promise((resolve, reject) => {
-        db.query(readyQuery2,[monthNum] ,(err, data) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data);
-          }
-        });
-      })
-    ]);
-  
-    for (let i = 0; i < data.length; i++) {
-      let hourlyRate = parseFloat(data[i].hourlyRates);
-      let teachingHours = parseFloat(data[i].teachingHours);
-      let cost = hourlyRate * teachingHours;
-      usualSalary += cost;
+  const monthNum = req.body.month;
+  const readyQuery =
+    "SELECT workerid, firstName, lastName, workerEmail, city, teachingHours, fixedFee, hourlyRates, startDate, endDate FROM workers w WHERE MONTH(w.startDate) = ?";
+  const readyQuery2 =
+    "SELECT SUM(workersextraactions.extrahours * extraactions.extraRate) AS totalCost FROM workersextraactions JOIN extraactions ON workersextraactions.idextraActions = extraactions.idextraActions WHERE MONTH(date) = ?";
+
+  console.log("monthNum " + monthNum);
+  let extraSalary = 0;
+  let usualSalary = 0;
+  let fixedFeeSalary = 0;
+  let salaryes = {};
+
+  const [data, data2] = await Promise.all([
+    new Promise((resolve, reject) => {
+      db.query(readyQuery, [monthNum], (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          console.logdata;
+          resolve(data);
+        }
+      });
+    }),
+    new Promise((resolve, reject) => {
+      db.query(readyQuery2, [monthNum], (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    }),
+  ]);
+
+  for (let i = 0; i < data.length; i++) {
+    let hourlyRate = parseFloat(data[i].hourlyRates);
+    let teachingHours = parseFloat(data[i].teachingHours);
+    let fixedFee = parseFloat(data[i].fixedFee);
+    let cost = hourlyRate * teachingHours;
+    usualSalary += cost;
+    if (fixedFee > 0) {
+      fixedFeeSalary += fixedFee;
     }
-  
-    extraSalary = data2[0].totalCost;
-  
-    salaryes.usualSalary = usualSalary;
-    salaryes.extraSalary = extraSalary;
-  
-    console.log(salaryes);
-    res.send({ message: salaryes });
-  });
+  }
+
+  extraSalary = data2[0].totalCost;
+
+  salaryes.usualSalary = usualSalary + fixedFeeSalary;
+  salaryes.extraSalary = extraSalary;
+
+  console.log(salaryes);
+  res.send({ message: salaryes });
+});
 
 app.post("/usersCreate", (req, res) => {
     const readyQuery = "INSERT INTO Accounts (`accountID`,`lastName`,`firstName`,`email`,`login`,`password`) VALUES (?)";
@@ -498,7 +505,6 @@ app.post("/sendSalary", (req, res) => {
     const mentor = req.body.mentor;
     const { firstName, lastName, startDate} = mentor;
     const monthNumber = parseInt(functions.getMonthNumber(functions.formatDateYYMMDD(startDate)))+1
-    console.log("firstName, lastName, startDate,monthNumber ---- " + firstName, lastName, startDate,monthNumber)
     db.query(
       "SELECT w.*, e.extraName, e.extraRate \
       FROM workersextraactions w \
