@@ -22,15 +22,15 @@ const generateExcel = async (worker) => {
       worksheet.getCell("A"+ (row)).value = worker.extraActions[i].extraName;
       worksheet.getCell("C"+ (row)).value = worker.extraActions[i].extraRate;
       worksheet.getCell("D"+ (row)).value = worker.extraActions[i].extrahours;
-
     }
     if (worker.fixedFee > 0){
-      worksheet.getCell("A"+row).value = "Fixed fee";
-      worksheet.getCell("B"+row).value = " ";
-      worksheet.getCell("C" + row).value = " ";
-      worksheet.getCell("D"+ row).value = " ";
-      worksheet.getCell("E"+ row).value = parseInt(worker.fixedFee);
-    }else{
+      worksheet.getCell("A17").value = "Fixed fee";
+      worksheet.getCell("B17").value = " ";
+      worksheet.getCell("C17").value = " ";
+      worksheet.getCell("D17").value = " ";
+      worksheet.getCell("E17").value = parseInt(worker.fixedFee);
+    }
+    else{
       worksheet.getCell('C17').value = {
         formula: `CONCATENATE(LEFT(A17,FIND("[[",A17)+1),"pay",RIGHT(A17,LEN(A17)-(FIND("]]",A17)-2)))`
       };
