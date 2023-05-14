@@ -261,7 +261,7 @@ app.post("/hourlyRates/mentorFilter",(req,res)=>{
     }
 
     if (req.body.params['startDate'] && req.body.params['endDate']) {
-        query += " AND startDate <= ? AND endDate <= ?";
+        query += " AND startDate >= ? AND endDate <= ?";
         queryParams.push(req.body.params['startDate'],req.body.params['endDate']);
     }else if(req.body.params['startDate'] && !req.body.params['endDate']){
         query += " AND startDate <= ?";
